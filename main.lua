@@ -1,144 +1,80 @@
 -- main.lua
 -- loadstring(game:HttpGet("https://raw.githubusercontent.com/aizen2tuffy/zero/main/main.lua"))()
 
--- ── Already loaded guard ───────────────────────────────────────────────────────
+-- ── Already loaded guard ──────────────────────────────────────────────────────
 if _G.ZERO_LOADED then
 	warn("[Zero] Already loaded.")
 	return
 end
 _G.ZERO_LOADED = true
 
-local GITHUB_RAW = "https://raw.githubusercontent.com/aizen2tuffy/zero/main/main.lua"
+local GITHUB_RAW = "https://raw.githubusercontent.com/aizen2tuffy/zero/main/"
 
 local function loadModule(path)
 	return loadstring(game:HttpGet(GITHUB_RAW .. path))()
 end
 
 -- ── Services ──────────────────────────────────────────────────────────────────
-local Players        = game:GetService("Players")
-local UIS            = game:GetService("UserInputService")
-local TweenService   = game:GetService("TweenService")
-local RunService     = game:GetService("RunService")
-local LocalPlayer    = Players.LocalPlayer
-local PlayerGui      = LocalPlayer:WaitForChild("PlayerGui")
+local Players      = game:GetService("Players")
+local UIS          = game:GetService("UserInputService")
+local RunService   = game:GetService("RunService")
+local LocalPlayer  = Players.LocalPlayer
+local PlayerGui    = LocalPlayer:WaitForChild("PlayerGui")
 
--- ── Modules ───────────────────────────────────────────────────────────────────
-local Notify   = loadModule("modules/Notify.lua")
+-- ── Modules (load Notify FIRST so it's available everywhere) ─────────────────
+local Notify = loadModule("modules/Notify.lua")
 _G.__ZeroNotify = Notify
+
 local Commands = loadModule("modules/Commands.lua")
+
+-- ── Wire into existing CommandBarGui ─────────────────────────────────────────
+-- Your game already has this ScreenGui with a Frame+TextBox inside StarterGuiStuff
+local CommandBarGui = PlayerGui:WaitForChild("StarterGuiStuff"):WaitForChild("CommandBarGui")
+local Frame         = CommandBarGui:WaitForChild("Frame")
+local TextBox       = Frame:WaitForChild("TextBox")
+
+-- Frame starts invisible, centred, full-width — matches your GUI data exactly
+Frame.Visible = false
 
 -- ── State ─────────────────────────────────────────────────────────────────────
 local _open    = false
 local _history = {}
 local _histIdx = 0
 
--- ── GUI ───────────────────────────────────────────────────────────────────────
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name           = "ZeroAdminGui"
-ScreenGui.ResetOnSpawn   = false
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.Parent         = PlayerGui
-
--- Backdrop
-local Backdrop = Instance.new("Frame", ScreenGui)
-Backdrop.Size                   = UDim2.fromScale(1, 1)
-Backdrop.BackgroundColor3       = Color3.fromRGB(0, 0, 0)
-Backdrop.BackgroundTransparency = 1
-Backdrop.BorderSizePixel        = 0
-Backdrop.ZIndex                 = 5
-Backdrop.Visible                = false
-
--- Container
-local Container = Instance.new("Frame", ScreenGui)
-Container.Name                   = "Container"
-Container.AnchorPoint            = Vector2.new(0.5, 0)
-Container.Position               = UDim2.new(0.5, 0, 0, -60)
-Container.Size                   = UDim2.new(0, 540, 0, 44)
-Container.BackgroundColor3       = Color3.fromRGB(18, 18, 22)
-Container.BackgroundTransparency = 0
-Container.BorderSizePixel        = 0
-Container.ZIndex                 = 10
-Container.ClipsDescendants       = true
-
-Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 10)
-
-local Stroke = Instance.new("UIStroke", Container)
-Stroke.Color        = Color3.fromRGB(80, 80, 110)
-Stroke.Thickness    = 1
-Stroke.Transparency = 0.5
-
-local Prefix = Instance.new("TextLabel", Container)
-Prefix.Size                   = UDim2.new(0, 32, 1, 0)
-Prefix.Position               = UDim2.new(0, 10, 0, 0)
-Prefix.BackgroundTransparency = 1
-Prefix.Text                   = "⌘"
-Prefix.TextColor3             = Color3.fromRGB(140, 110, 230)
-Prefix.TextSize               = 16
-Prefix.Font                   = Enum.Font.GothamBold
-Prefix.ZIndex                 = 11
-
-local TextBox = Instance.new("TextBox", Container)
-TextBox.Position               = UDim2.new(0, 48, 0, 0)
-TextBox.Size                   = UDim2.new(1, -60, 1, 0)
-TextBox.BackgroundTransparency = 1
-TextBox.TextColor3             = Color3.fromRGB(230, 230, 240)
-TextBox.PlaceholderColor3      = Color3.fromRGB(85, 85, 110)
-TextBox.PlaceholderText        = "command...  (↑↓ history, Tab to complete)"
-TextBox.Text                   = ""
-TextBox.TextSize               = 14
-TextBox.Font                   = Enum.Font.Gotham
-TextBox.TextXAlignment         = Enum.TextXAlignment.Left
-TextBox.ClearTextOnFocus       = false
-TextBox.ZIndex                 = 11
-
--- Suggestion bar
-local SuggestionBar = Instance.new("Frame", Container)
-SuggestionBar.Size                   = UDim2.new(1, 0, 0, 26)
-SuggestionBar.Position               = UDim2.new(0, 0, 1, 0)
-SuggestionBar.BackgroundColor3       = Color3.fromRGB(12, 12, 18)
-SuggestionBar.BackgroundTransparency = 0
-SuggestionBar.BorderSizePixel        = 0
-SuggestionBar.ZIndex                 = 10
-SuggestionBar.Visible                = false
-
-local SuggestLabel = Instance.new("TextLabel", SuggestionBar)
-SuggestLabel.Size                   = UDim2.new(1, -12, 1, 0)
-SuggestLabel.Position               = UDim2.new(0, 10, 0, 0)
+-- ── Suggestion label (appended below the existing TextBox) ────────────────────
+local SuggestLabel = Instance.new("TextLabel", Frame)
+SuggestLabel.Name               = "ZeroSuggest"
+SuggestLabel.AnchorPoint        = Vector2.new(0, 0)
+SuggestLabel.Position           = UDim2.new(0, 4, 1, 2)
+SuggestLabel.Size               = UDim2.new(1, -8, 0, 18)
 SuggestLabel.BackgroundTransparency = 1
-SuggestLabel.TextColor3             = Color3.fromRGB(110, 110, 145)
-SuggestLabel.TextSize               = 12
-SuggestLabel.Font                   = Enum.Font.Gotham
-SuggestLabel.TextXAlignment         = Enum.TextXAlignment.Left
-SuggestLabel.ZIndex                 = 11
+SuggestLabel.TextColor3         = Color3.fromRGB(130, 130, 160)
+SuggestLabel.TextSize           = 12
+SuggestLabel.Font               = Enum.Font.Gotham
+SuggestLabel.TextXAlignment     = Enum.TextXAlignment.Left
+SuggestLabel.Text               = ""
+SuggestLabel.ZIndex             = 5
+SuggestLabel.Visible            = false
 
--- ── Tweens ────────────────────────────────────────────────────────────────────
-local TI_IN  = TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-local TI_OUT = TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-
+-- ── Open / close (mirrors your existing LocalScript exactly) ──────────────────
 local function openBar()
-	_open            = true
-	Backdrop.Visible = true
-	TweenService:Create(Backdrop,  TI_IN, {BackgroundTransparency = 0.72}):Play()
-	TweenService:Create(Container, TI_IN, {Position = UDim2.new(0.5, 0, 0, 14)}):Play()
-	task.delay(0.05, function()
-		TextBox.Text = ""
+	_open         = true
+	Frame.Visible = true
+	TextBox.Text  = ""
+	task.defer(function()
+		task.wait(0.1)
 		TextBox:CaptureFocus()
+		TextBox.Text         = ""
+		TextBox.TextEditable = true
 	end)
 end
 
 local function closeBar()
-	_open = false
+	_open         = false
+	Frame.Visible = false
 	TextBox:ReleaseFocus()
-	TweenService:Create(Backdrop,  TI_OUT, {BackgroundTransparency = 1}):Play()
-	TweenService:Create(Container, TI_OUT, {Position = UDim2.new(0.5, 0, 0, -60)}):Play()
-	task.delay(0.2, function()
-		if not _open then
-			Backdrop.Visible      = false
-			SuggestionBar.Visible = false
-			Container.Size        = UDim2.new(0, 540, 0, 44)
-			TextBox.Text          = ""
-		end
-	end)
+	SuggestLabel.Text    = ""
+	SuggestLabel.Visible = false
 end
 
 local function toggleBar()
@@ -151,8 +87,8 @@ local _topSuggestion = nil
 local function updateSuggestions(text)
 	_topSuggestion = nil
 	if text == "" or text:find(" ") then
-		SuggestionBar.Visible = false
-		Container.Size        = UDim2.new(0, 540, 0, 44)
+		SuggestLabel.Visible = false
+		SuggestLabel.Text    = ""
 		return
 	end
 	local word    = (text:match("^(%S+)") or ""):lower()
@@ -163,14 +99,13 @@ local function updateSuggestions(text)
 		end
 	end
 	if #matches == 0 then
-		SuggestionBar.Visible = false
-		Container.Size        = UDim2.new(0, 540, 0, 44)
+		SuggestLabel.Visible = false
+		SuggestLabel.Text    = ""
 	else
 		table.sort(matches)
-		_topSuggestion        = matches[1]
-		SuggestLabel.Text     = table.concat(matches, "   ")
-		SuggestionBar.Visible = true
-		Container.Size        = UDim2.new(0, 540, 0, 70)
+		_topSuggestion       = matches[1]
+		SuggestLabel.Text    = table.concat(matches, "   ")
+		SuggestLabel.Visible = true
 	end
 end
 
@@ -178,21 +113,17 @@ end
 local function execute(raw)
 	if not raw or raw == "" then return end
 
-	-- Unload
 	if raw:lower() == "unload" then
 		Notify.send("Zero admin unloaded.", LocalPlayer, 3)
 		task.delay(0.5, function()
 			closeBar()
-			task.delay(0.3, function()
-				ScreenGui:Destroy()
-				_G.ZERO_LOADED   = nil
-				_G.__ZeroNotify  = nil
-			end)
+			SuggestLabel:Destroy()
+			_G.ZERO_LOADED  = nil
+			_G.__ZeroNotify = nil
 		end)
 		return
 	end
 
-	-- History (IY style)
 	if _history[#_history] ~= raw then
 		table.insert(_history, raw)
 	end
@@ -213,40 +144,22 @@ local function execute(raw)
 	end
 end
 
--- ── Input — IY-style: prefix key triggers from Mouse.KeyDown ─────────────────
--- IY uses the mouse KeyDown event so it fires even when chat is focused.
--- We mirror that + UIS for backup.
-local IYMouse = LocalPlayer:GetMouse()
-
-local function onPrefixKey()
-	-- Don't open if a different textbox (chat etc.) is focused — only toggle
-	toggleBar()
-end
-
--- Primary: mouse KeyDown (fires regardless of chat focus, like IY)
-IYMouse.KeyDown:Connect(function(key)
-	-- backtick (`) — same default as IY
-	if key == ";" then
-		RunService.RenderStepped:Wait()
-		onPrefixKey()
-	end
-end)
-
--- Backup: UIS (for cases where mouse events aren't firing)
-UIS.InputBegan:Connect(function(input, processed)
-	if processed then return end
+-- ── Input — exactly how your existing LocalScript does it ────────────────────
+-- UIS handles ; (Quote in Roblox terms) — gameProcessed check matches yours
+UIS.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
 	if input.KeyCode == Enum.KeyCode.Semicolon then
-		onPrefixKey()
+		toggleBar()
 	end
 end)
 
--- ── TextBox input ─────────────────────────────────────────────────────────────
+-- ── TextBox wiring ────────────────────────────────────────────────────────────
 TextBox:GetPropertyChangedSignal("Text"):Connect(function()
 	if _open then updateSuggestions(TextBox.Text) end
 end)
 
--- History nav + Tab complete (also mirrors IY)
-UIS.InputBegan:Connect(function(input, processed)
+-- History nav + Tab autocomplete
+UIS.InputBegan:Connect(function(input, gameProcessed)
 	if not _open then return end
 	if input.KeyCode == Enum.KeyCode.Up then
 		_histIdx               = math.max(1, _histIdx - 1)
@@ -264,15 +177,22 @@ UIS.InputBegan:Connect(function(input, processed)
 	end
 end)
 
+-- FocusLost — mirrors your existing LocalScript logic exactly
 TextBox.FocusLost:Connect(function(enterPressed)
-	if not _open then return end
 	if enterPressed then
 		local text = TextBox.Text
-		closeBar()
-		execute(text)
+		TextBox.Text = ""
+		-- toggle off (your script does this on enter too)
+		_open         = false
+		Frame.Visible = false
+		SuggestLabel.Visible = false
+		SuggestLabel.Text    = ""
+		if text and text ~= "" then
+			execute(text)
+		end
 	else
 		closeBar()
 	end
 end)
 
-Notify.send("Zero admin loaded. Press ` to open.", LocalPlayer, 4)
+Notify.send("Zero admin loaded. Press ; to open.", LocalPlayer, 4)
