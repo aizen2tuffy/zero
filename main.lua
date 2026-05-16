@@ -4,19 +4,17 @@
 if _G.ZERO_LOADED then warn("[Zero] Already loaded.") return end
 _G.ZERO_LOADED = true
 
--- FIXED base path (was pointing to main.lua itself which broke all modules)
 local GITHUB_RAW = "https://raw.githubusercontent.com/aizen2tuffy/zero/main/"
 
 local function loadModule(path)
 	return loadstring(game:HttpGet(GITHUB_RAW .. path))()
 end
 
-local Players      = game:GetService("Players")
-local UIS          = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local RunService   = game:GetService("RunService")
-local LocalPlayer  = Players.LocalPlayer
-local PlayerGui    = LocalPlayer:WaitForChild("PlayerGui")
+local Players     = game:GetService("Players")
+local UIS         = game:GetService("UserInputService")
+local RunService  = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui   = LocalPlayer:WaitForChild("PlayerGui")
 
 local Notify   = loadModule("modules/Notify.lua")
 _G.__ZeroNotify = Notify
@@ -37,7 +35,7 @@ local _open    = false
 local _history = {}
 local _histIdx = 0
 
--- ── GUI ───────────────────────────────────────────────────────────────────────
+-- ── GUI — matches your original exactly, but centred vertically ───────────────
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name           = "ZeroAdminGui"
 ScreenGui.ResetOnSpawn   = false
@@ -46,99 +44,75 @@ ScreenGui.IgnoreGuiInset = true
 ScreenGui.DisplayOrder   = 100
 ScreenGui.Parent         = PlayerGui
 
--- Container: fixed width, centred, starts OFF screen above centre
-local Container = Instance.new("Frame", ScreenGui)
-Container.Name                   = "Container"
-Container.AnchorPoint            = Vector2.new(0.5, 0.5)
-Container.Position               = UDim2.new(0.5, 0, 0.5, -300) -- off screen above centre
-Container.Size                   = UDim2.new(0, 540, 0, 44)
-Container.BackgroundColor3       = Color3.fromRGB(18, 18, 22)
-Container.BackgroundTransparency = 0
-Container.BorderSizePixel        = 0
-Container.ZIndex                 = 10
-Container.ClipsDescendants       = true
-Container.Visible                = false  -- hidden until opened, no ugly flash
+-- Frame: full width, 40px tall, anchored at left-centre so it sits mid-screen
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Name                   = "Frame"
+Frame.AnchorPoint            = Vector2.new(0, 0.5)       -- left edge, vertical centre
+Frame.Position               = UDim2.new(0, 0, 0.5, 0)  -- exactly mid-screen vertically
+Frame.Size                   = UDim2.new(1, 0, 0, 40)   -- full width, 40px tall
+Frame.BackgroundColor3       = Color3.fromRGB(18, 18, 22)
+Frame.BackgroundTransparency = 0
+Frame.BorderSizePixel        = 0
+Frame.ZIndex                 = 1
+Frame.Visible                = false  -- hidden by default, no flash
 
-Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 10)
-
-local Stroke = Instance.new("UIStroke", Container)
-Stroke.Color        = Color3.fromRGB(80, 80, 110)
-Stroke.Thickness    = 1
-Stroke.Transparency = 0.5
-
-local Prefix = Instance.new("TextLabel", Container)
-Prefix.Size                   = UDim2.new(0, 32, 1, 0)
-Prefix.Position               = UDim2.new(0, 10, 0, 0)
-Prefix.BackgroundTransparency = 1
-Prefix.Text                   = "⌘"
-Prefix.TextColor3             = Color3.fromRGB(140, 110, 230)
-Prefix.TextSize               = 16
-Prefix.Font                   = Enum.Font.GothamBold
-Prefix.ZIndex                 = 11
-
-local TextBox = Instance.new("TextBox", Container)
-TextBox.Position               = UDim2.new(0, 48, 0, 0)
-TextBox.Size                   = UDim2.new(1, -60, 1, 0)
+-- TextBox: centred inside Frame, matches original anchor (0.5, 0.5)
+local TextBox = Instance.new("TextBox", Frame)
+TextBox.Name                  = "TextBox"
+TextBox.AnchorPoint           = Vector2.new(0.5, 0.5)
+TextBox.Position              = UDim2.new(0.5, 0, 0.5, 0)
+TextBox.Size                  = UDim2.new(1, 0, 0, 26)   -- same height as original
 TextBox.BackgroundTransparency = 1
-TextBox.TextColor3             = Color3.fromRGB(230, 230, 240)
-TextBox.PlaceholderColor3      = Color3.fromRGB(85, 85, 110)
-TextBox.PlaceholderText        = "command...  (↑↓ history, Tab to complete)"
-TextBox.Text                   = ""
-TextBox.TextSize               = 14
-TextBox.Font                   = Enum.Font.Gotham
-TextBox.TextXAlignment         = Enum.TextXAlignment.Left
-TextBox.ClearTextOnFocus       = false
-TextBox.ZIndex                 = 11
+TextBox.TextColor3            = Color3.fromRGB(230, 230, 240)
+TextBox.PlaceholderColor3     = Color3.fromRGB(85, 85, 110)
+TextBox.PlaceholderText       = "enter command..."
+TextBox.Text                  = ""
+TextBox.TextScaled            = true
+TextBox.TextSize              = 14
+TextBox.Font                  = Enum.Font.Gotham
+TextBox.TextXAlignment        = Enum.TextXAlignment.Left
+TextBox.TextEditable          = true
+TextBox.ClearTextOnFocus      = false
+TextBox.ZIndex                = 1
 
--- Suggestion bar — BIGGER and more visible than before
-local SuggestionBar = Instance.new("Frame", Container)
-SuggestionBar.Size                   = UDim2.new(1, 0, 0, 28)
-SuggestionBar.Position               = UDim2.new(0, 0, 1, 0)
-SuggestionBar.BackgroundColor3       = Color3.fromRGB(12, 12, 18)
-SuggestionBar.BackgroundTransparency = 0
-SuggestionBar.BorderSizePixel        = 0
-SuggestionBar.ZIndex                 = 10
-SuggestionBar.Visible                = false
+local Pad = Instance.new("UIPadding", TextBox)
+Pad.PaddingLeft  = UDim.new(0, 6)
+Pad.PaddingRight = UDim.new(0, 6)
 
-local SuggestLabel = Instance.new("TextLabel", SuggestionBar)
-SuggestLabel.Size                   = UDim2.new(1, -12, 1, 0)
-SuggestLabel.Position               = UDim2.new(0, 10, 0, 0)
+-- Suggestion label — below the Frame, bigger and more visible
+local SuggestLabel = Instance.new("TextLabel", Frame)
+SuggestLabel.Name               = "ZeroSuggest"
+SuggestLabel.AnchorPoint        = Vector2.new(0, 0)
+SuggestLabel.Position           = UDim2.new(0, 6, 1, 4)
+SuggestLabel.Size               = UDim2.new(1, -12, 0, 22)
 SuggestLabel.BackgroundTransparency = 1
-SuggestLabel.TextColor3             = Color3.fromRGB(190, 175, 255) -- bright purple-white
-SuggestLabel.TextSize               = 15                            -- was 12
-SuggestLabel.Font                   = Enum.Font.GothamMedium        -- was Gotham
-SuggestLabel.TextXAlignment         = Enum.TextXAlignment.Left
-SuggestLabel.ZIndex                 = 11
+SuggestLabel.TextColor3         = Color3.fromRGB(190, 175, 255)
+SuggestLabel.TextSize           = 15
+SuggestLabel.Font               = Enum.Font.GothamMedium
+SuggestLabel.TextXAlignment     = Enum.TextXAlignment.Left
+SuggestLabel.Text               = ""
+SuggestLabel.ZIndex             = 2
+SuggestLabel.Visible            = false
 
--- ── Tweens ────────────────────────────────────────────────────────────────────
-local TI_IN  = TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-local TI_OUT = TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-
-local OPEN_POS  = UDim2.new(0.5, 0, 0.5, 0)    -- true screen centre
-local CLOSE_POS = UDim2.new(0.5, 0, 0.5, -300) -- above centre, off screen
-
+-- ── Open / close — simple Visible toggle, exactly like the original ───────────
 local function openBar()
-	_open             = true
-	Container.Visible = true
-	TweenService:Create(Container, TI_IN, {Position = OPEN_POS}):Play()
-	task.delay(0.05, function()
-		TextBox.Text = ""
+	_open         = true
+	Frame.Visible = true
+	TextBox.Text  = ""
+	task.defer(function()
+		task.wait(0.1)
 		TextBox:CaptureFocus()
+		TextBox.Text         = ""
+		TextBox.TextEditable = true
 	end)
 end
 
 local function closeBar()
-	_open = false
+	_open                = false
+	Frame.Visible        = false
 	TextBox:ReleaseFocus()
-	TweenService:Create(Container, TI_OUT, {Position = CLOSE_POS}):Play()
-	task.delay(0.2, function()
-		if not _open then
-			Container.Visible     = false
-			SuggestionBar.Visible = false
-			Container.Size        = UDim2.new(0, 540, 0, 44)
-			TextBox.Text          = ""
-		end
-	end)
+	SuggestLabel.Text    = ""
+	SuggestLabel.Visible = false
 end
 
 local function toggleBar()
@@ -151,8 +125,8 @@ local _topSuggestion = nil
 local function updateSuggestions(text)
 	_topSuggestion = nil
 	if text == "" or text:find(" ") then
-		SuggestionBar.Visible = false
-		Container.Size        = UDim2.new(0, 540, 0, 44)
+		SuggestLabel.Visible = false
+		SuggestLabel.Text    = ""
 		return
 	end
 	local word    = (text:match("^(%S+)") or ""):lower()
@@ -163,14 +137,13 @@ local function updateSuggestions(text)
 		end
 	end
 	if #matches == 0 then
-		SuggestionBar.Visible = false
-		Container.Size        = UDim2.new(0, 540, 0, 44)
+		SuggestLabel.Visible = false
+		SuggestLabel.Text    = ""
 	else
 		table.sort(matches)
-		_topSuggestion        = matches[1]
-		SuggestLabel.Text     = "  " .. table.concat(matches, "   ·   ")
-		SuggestionBar.Visible = true
-		Container.Size        = UDim2.new(0, 540, 0, 72)
+		_topSuggestion       = matches[1]
+		SuggestLabel.Text    = "  " .. table.concat(matches, "   ·   ")
+		SuggestLabel.Visible = true
 	end
 end
 
@@ -218,7 +191,7 @@ end)
 
 UIS.InputBegan:Connect(function(input, processed)
 	if processed then return end
-	if input.KeyCode == Enum.KeyCode.Semicolon then
+	if input.KeyCode == Enum.KeyCode.Semicolon or input.KeyCode == Enum.KeyCode.Quote then
 		toggleBar()
 	end
 end)
@@ -227,7 +200,7 @@ TextBox:GetPropertyChangedSignal("Text"):Connect(function()
 	if _open then updateSuggestions(TextBox.Text) end
 end)
 
-UIS.InputBegan:Connect(function(input, processed)
+UIS.InputBegan:Connect(function(input, _p)
 	if not _open then return end
 	if input.KeyCode == Enum.KeyCode.Up then
 		_histIdx               = math.max(1, _histIdx - 1)
