@@ -15,34 +15,78 @@ local function loadModule(path)
 end
 
 -- ── Services ──────────────────────────────────────────────────────────────────
-local Players      = game:GetService("Players")
-local UIS          = game:GetService("UserInputService")
-local RunService   = game:GetService("RunService")
-local LocalPlayer  = Players.LocalPlayer
-local PlayerGui    = LocalPlayer:WaitForChild("PlayerGui")
+local Players     = game:GetService("Players")
+local UIS         = game:GetService("UserInputService")
+local RunService  = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui   = LocalPlayer:WaitForChild("PlayerGui")
 
--- ── Modules (load Notify FIRST so it's available everywhere) ─────────────────
+-- ── Modules ───────────────────────────────────────────────────────────────────
 local Notify = loadModule("modules/Notify.lua")
 _G.__ZeroNotify = Notify
 
 local Commands = loadModule("modules/Commands.lua")
 
--- ── Wire into existing CommandBarGui ─────────────────────────────────────────
--- Your game already has this ScreenGui with a Frame+TextBox inside StarterGuiStuff
-local CommandBarGui = PlayerGui:WaitForChild("StarterGuiStuff"):WaitForChild("CommandBarGui")
-local Frame         = CommandBarGui:WaitForChild("Frame")
-local TextBox       = Frame:WaitForChild("TextBox")
+-- ── Build GUI in-script ───────────────────────────────────────────────────────
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name                = "CommandBarGui"
+ScreenGui.ResetOnSpawn        = false
+ScreenGui.ZIndexBehavior      = Enum.ZIndexBehavior.Sibling
+ScreenGui.DisplayOrder        = 10
+ScreenGui.IgnoreGuiInset      = true
+ScreenGui.Parent              = PlayerGui
 
--- Frame starts invisible, centred, full-width — matches your GUI data exactly
-Frame.Visible = false
+local Frame = Instance.new("Frame")
+Frame.Name                    = "Frame"
+Frame.AnchorPoint             = Vector2.new(0, 0)
+Frame.Position                = UDim2.new(0, 0, 0, 0)
+Frame.Size                    = UDim2.new(1, 0, 0, 26)   -- full-width, 26px tall (matches GUI data)
+Frame.BackgroundColor3        = Color3.fromRGB(30, 30, 40)
+Frame.BackgroundTransparency  = 0.15
+Frame.BorderSizePixel         = 0
+Frame.Visible                 = false
+Frame.ZIndex                  = 1
+Frame.Parent                  = ScreenGui
 
--- ── State ─────────────────────────────────────────────────────────────────────
-local _open    = false
-local _history = {}
-local _histIdx = 0
+-- subtle bottom border line
+local Divider = Instance.new("Frame")
+Divider.Name                  = "Divider"
+Divider.AnchorPoint           = Vector2.new(0, 1)
+Divider.Position              = UDim2.new(0, 0, 1, 0)
+Divider.Size                  = UDim2.new(1, 0, 0, 1)
+Divider.BackgroundColor3      = Color3.fromRGB(100, 100, 180)
+Divider.BackgroundTransparency = 0
+Divider.BorderSizePixel       = 0
+Divider.ZIndex                = 2
+Divider.Parent                = Frame
 
--- ── Suggestion label (appended below the existing TextBox) ────────────────────
-local SuggestLabel = Instance.new("TextLabel", Frame)
+local TextBox = Instance.new("TextBox")
+TextBox.Name                  = "TextBox"
+TextBox.AnchorPoint           = Vector2.new(0.5, 0.5)
+TextBox.Position              = UDim2.new(0.5, 0, 0.5, 0)
+TextBox.Size                  = UDim2.new(1, 0, 0, 26)
+TextBox.BackgroundTransparency = 1
+TextBox.TextColor3            = Color3.fromRGB(230, 230, 255)
+TextBox.PlaceholderColor3     = Color3.fromRGB(110, 110, 140)
+TextBox.PlaceholderText       = "enter command…"
+TextBox.Text                  = ""
+TextBox.TextSize              = 14
+TextBox.Font                  = Enum.Font.Gotham
+TextBox.TextXAlignment        = Enum.TextXAlignment.Left
+TextBox.TextEditable          = true
+TextBox.ClearTextOnFocus      = false
+TextBox.ZIndex                = 1
+TextBox.Visible               = true
+TextBox.Parent                = Frame
+
+-- left padding via UIPadding
+local Pad = Instance.new("UIPadding")
+Pad.PaddingLeft  = UDim.new(0, 6)
+Pad.PaddingRight = UDim.new(0, 6)
+Pad.Parent       = TextBox
+
+-- ── Suggestion label (sits just below the bar) ────────────────────────────────
+local SuggestLabel = Instance.new("TextLabel")
 SuggestLabel.Name               = "ZeroSuggest"
 SuggestLabel.AnchorPoint        = Vector2.new(0, 0)
 SuggestLabel.Position           = UDim2.new(0, 4, 1, 2)
@@ -55,8 +99,14 @@ SuggestLabel.TextXAlignment     = Enum.TextXAlignment.Left
 SuggestLabel.Text               = ""
 SuggestLabel.ZIndex             = 5
 SuggestLabel.Visible            = false
+SuggestLabel.Parent             = Frame
 
--- ── Open / close (mirrors your existing LocalScript exactly) ──────────────────
+-- ── State ─────────────────────────────────────────────────────────────────────
+local _open    = false
+local _history = {}
+local _histIdx = 0
+
+-- ── Open / close ──────────────────────────────────────────────────────────────
 local function openBar()
 	_open         = true
 	Frame.Visible = true
@@ -117,7 +167,7 @@ local function execute(raw)
 		Notify.send("Zero admin unloaded.", LocalPlayer, 3)
 		task.delay(0.5, function()
 			closeBar()
-			SuggestLabel:Destroy()
+			ScreenGui:Destroy()
 			_G.ZERO_LOADED  = nil
 			_G.__ZeroNotify = nil
 		end)
@@ -144,16 +194,16 @@ local function execute(raw)
 	end
 end
 
--- ── Input — exactly how your existing LocalScript does it ────────────────────
--- UIS handles ; (Quote in Roblox terms) — gameProcessed check matches yours
+-- ── Input ─────────────────────────────────────────────────────────────────────
+-- Toggle on ; (Quote/Semicolon)
 UIS.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
-	if input.KeyCode == Enum.KeyCode.Semicolon then
+	if input.KeyCode == Enum.KeyCode.Semicolon or input.KeyCode == Enum.KeyCode.Quote then
 		toggleBar()
 	end
 end)
 
--- ── TextBox wiring ────────────────────────────────────────────────────────────
+-- TextBox live autocomplete
 TextBox:GetPropertyChangedSignal("Text"):Connect(function()
 	if _open then updateSuggestions(TextBox.Text) end
 end)
@@ -177,14 +227,13 @@ UIS.InputBegan:Connect(function(input, gameProcessed)
 	end
 end)
 
--- FocusLost — mirrors your existing LocalScript logic exactly
+-- FocusLost
 TextBox.FocusLost:Connect(function(enterPressed)
 	if enterPressed then
 		local text = TextBox.Text
-		TextBox.Text = ""
-		-- toggle off (your script does this on enter too)
-		_open         = false
-		Frame.Visible = false
+		TextBox.Text         = ""
+		_open                = false
+		Frame.Visible        = false
 		SuggestLabel.Visible = false
 		SuggestLabel.Text    = ""
 		if text and text ~= "" then
