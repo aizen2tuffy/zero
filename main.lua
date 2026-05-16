@@ -1,1 +1,279 @@
-local v0="https://raw.githubusercontent.com/aizen2tuffy/zero/refs/heads/main/main.lua?token=GHSAT0AAAAAAD5I5EAJZC5W4G7M5LVMJ47Y2QHZSDA";local function v1(v103) return loadstring(game:HttpGet(v0   .. v103 ))();end local v2=game:GetService("Players");local v3=game:GetService("UserInputService");local v4=game:GetService("TweenService");local v5=v2.LocalPlayer;local v6=v1("modules/Notify.lua");_G.__AdminNotify=v6;local v7=v1("modules/Commands.lua");local v8=false;local v9={};local v10=0;local v11=Instance.new("ScreenGui");v11.Name="CustomAdminGui";v11.ResetOnSpawn=false;v11.ZIndexBehavior=Enum.ZIndexBehavior.Sibling;v11.Parent=v5:WaitForChild("PlayerGui");v6._init(v11);local v17=Instance.new("Frame");v17.Name="Backdrop";v17.Size=UDim2.fromScale(1,1 + 0 );v17.BackgroundColor3=Color3.fromRGB(0 -0 ,0,0);v17.BackgroundTransparency=2 -1 ;v17.BorderSizePixel=0 + 0 ;v17.ZIndex=2 + 3 ;v17.Visible=false;v17.Parent=v11;local v26=Instance.new("Frame");v26.Name="Container";v26.AnchorPoint=Vector2.new(885.5 -(261 + 624) ,0 -0 );v26.Position=UDim2.new(1080.5 -(1020 + 60) ,1423 -(630 + 793) ,0 -0 , -60);v26.Size=UDim2.new(0 -0 ,540,0,18 + 26 );v26.BackgroundColor3=Color3.fromRGB(61 -43 ,1765 -(760 + 987) ,1935 -(1789 + 124) );v26.BackgroundTransparency=766 -(745 + 21) ;v26.BorderSizePixel=0 + 0 ;v26.ZIndex=27 -17 ;v26.ClipsDescendants=true;v26.Parent=v11;local v37=Instance.new("UICorner");v37.CornerRadius=UDim.new(0 -0 ,10);v37.Parent=v26;local v40=Instance.new("UIStroke");v40.Color=Color3.fromRGB(1 + 79 ,63 + 17 ,1155 -(87 + 968) );v40.Thickness=1;v40.Transparency=0.5 -0 ;v40.Parent=v26;local v45=Instance.new("TextLabel");v45.Name="Prefix";v45.Size=UDim2.new(0 + 0 ,72 -40 ,1,1413 -(447 + 966) );v45.Position=UDim2.new(0,27 -17 ,0,1817 -(1703 + 114) );v45.BackgroundTransparency=702 -(376 + 325) ;v45.Text="⌘";v45.TextColor3=Color3.fromRGB(229 -89 ,120,676 -456 );v45.TextSize=16;v45.Font=Enum.Font.GothamBold;v45.ZIndex=4 + 7 ;v45.Parent=v26;local v57=Instance.new("TextBox");v57.Name="Input";v57.Position=UDim2.new(0 -0 ,62 -(9 + 5) ,376 -(85 + 291) ,1265 -(243 + 1022) );v57.Size=UDim2.new(3 -2 , -60,1 + 0 ,1180 -(1123 + 57) );v57.BackgroundTransparency=1;v57.TextColor3=Color3.fromRGB(188 + 42 ,484 -(163 + 91) ,2170 -(1869 + 61) );v57.PlaceholderColor3=Color3.fromRGB(26 + 64 ,316 -226 ,168 -58 );v57.PlaceholderText="type a command…   (↑↓ history)";v57.Text="";v57.TextSize=2 + 12 ;v57.Font=Enum.Font.Gotham;v57.TextXAlignment=Enum.TextXAlignment.Left;v57.ClearTextOnFocus=false;v57.ZIndex=14 -3 ;v57.Parent=v26;local v74=Instance.new("Frame");v74.Name="SuggestionBar";v74.Size=UDim2.new(1 + 0 ,1474 -(1329 + 145) ,0,997 -(140 + 831) );v74.Position=UDim2.new(0,1850 -(1409 + 441) ,1,0);v74.BackgroundColor3=Color3.fromRGB(730 -(15 + 703) ,6 + 6 ,454 -(262 + 176) );v74.BackgroundTransparency=0;v74.BorderSizePixel=1721 -(345 + 1376) ;v74.ZIndex=698 -(198 + 490) ;v74.Visible=false;v74.Parent=v26;local v84=Instance.new("TextLabel");v84.Name="Label";v84.Size=UDim2.new(4 -3 , -12,2 -1 ,0);v84.Position=UDim2.new(0,1216 -(696 + 510) ,0 -0 ,0);v84.BackgroundTransparency=1263 -(1091 + 171) ;v84.TextColor3=Color3.fromRGB(20 + 100 ,377 -257 ,150);v84.TextSize=39 -27 ;v84.Font=Enum.Font.Gotham;v84.TextXAlignment=Enum.TextXAlignment.Left;v84.Text="";v84.ZIndex=385 -(123 + 251) ;v84.Parent=v74;local v96=TweenInfo.new(0.18 -0 ,Enum.EasingStyle.Quad,Enum.EasingDirection.Out);local v97=TweenInfo.new(698.14 -(208 + 490) ,Enum.EasingStyle.Quad,Enum.EasingDirection.In);local function v98() local v104=0 + 0 ;local v105;while true do if (v104==(0 + 0)) then v105=836 -(660 + 176) ;while true do if (v105==(1 + 0)) then v4:Create(v17,v96,{BackgroundTransparency=202.7 -(14 + 188) }):Play();v4:Create(v26,v96,{Position=UDim2.new(675.5 -(534 + 141) ,0,0 + 0 ,13 + 1 )}):Play();v105=2 + 0 ;end if (2==v105) then task.delay(0.05 -0 ,function() local v147=0 -0 ;while true do if (v147==(0 -0)) then v57.Text="";v57:CaptureFocus();break;end end end);break;end if (v105==(0 + 0)) then v8=true;v17.Visible=true;v105=1 + 0 ;end end break;end end end local function v99() local v106=396 -(115 + 281) ;while true do if (v106==2) then task.delay(0.15 -0 ,function() if  not v8 then local v146=0;while true do if (v146==0) then v17.Visible=false;v74.Visible=false;v146=1 + 0 ;end if (v146==(2 -1)) then v57.Text="";v26.Size=UDim2.new(0 -0 ,1407 -(550 + 317) ,0,44);break;end end end end);break;end if (v106==0) then v8=false;v57:ReleaseFocus();v106=1;end if (v106==1) then v4:Create(v17,v97,{BackgroundTransparency=1 -0 }):Play();v4:Create(v26,v97,{Position=UDim2.new(0.5,0 -0 ,0 -0 , -(345 -(134 + 151)))}):Play();v106=1667 -(970 + 695) ;end end end local function v100() if v8 then v99();else v98();end end local function v101(v107) if (v107=="") then v74.Visible=false;v26.Size=UDim2.new(0,1030 -490 ,0,2034 -(582 + 1408) );return;end local v108=v107:match("^(%S+)") or "" ;local v109={};for v124 in pairs(v7.list) do if ((v124:sub(3 -2 , #v108)==v108:lower()) and (v124~=v108:lower())) then table.insert(v109,v124);end end if ( #v109==(0 -0)) then local v127=0;while true do if (v127==0) then v74.Visible=false;v26.Size=UDim2.new(0 -0 ,2364 -(1195 + 629) ,0 -0 ,44);break;end end else local v128=241 -(187 + 54) ;while true do if (v128==0) then table.sort(v109);v84.Text=table.concat(v109,"   ");v128=781 -(162 + 618) ;end if (v128==1) then v74.Visible=true;v26.Size=UDim2.new(0,540,0 + 0 ,70);break;end end end end local function v102(v110) local v111=0 + 0 ;local v112;local v113;local v114;while true do if (v111==(0 -0)) then if ( not v110 or (v110=="")) then return;end if v110:lower():match("^unload$") then local v136=0;local v137;while true do if (v136==(0 -0)) then v137=0;while true do local v156=0;while true do if (0==v156) then if (v137==0) then v6.info("Admin unloaded.");task.delay(0.6,function() local v161=0 + 0 ;local v162;while true do if ((1636 -(1373 + 263))==v161) then v162=1000 -(451 + 549) ;while true do if (v162==(0 + 0)) then v99();task.delay(0.3 -0 ,function() v11:Destroy();end);break;end end break;end end end);v137=1;end if (v137==(1 -0)) then return;end break;end end end break;end end end v111=1;end if ((1386 -(746 + 638))==v111) then local v129=0;while true do if (v129==(1 + 0)) then v111=4 -1 ;break;end if (v129==(341 -(218 + 123))) then v112=v110:split(" ");v113=v112[1582 -(1535 + 46) ]:lower();v129=1;end end end if (v111==4) then if v7.list[v113] then local v138=0 + 0 ;local v139;local v140;while true do if ((0 + 0)==v138) then v139,v140=pcall(v7.list[v113],v5,v114);if  not v139 then v6.error("Error: "   .. tostring(v140) );end break;end end else v6.warn("Unknown command: "   .. v113 );end break;end if (v111==(561 -(306 + 254))) then if (v9[ #v9]~=v110) then table.insert(v9,v110);end v10= #v9 + 1 ;v111=1 + 1 ;end if (v111==3) then local v130=0 -0 ;while true do if ((1467 -(899 + 568))==v130) then v114={};for v148=2, #v112 do table.insert(v114,v112[v148]);end v130=1;end if (v130==(1 + 0)) then v111=4;break;end end end end end v3.InputBegan:Connect(function(v115,v116) local v117=0 -0 ;while true do if (v117==0) then if v116 then return;end if ((v115.KeyCode==Enum.KeyCode.Quote) or (v115.KeyCode==Enum.KeyCode.BackQuote)) then v100();end break;end end end);v57:GetPropertyChangedSignal("Text"):Connect(function() local v118=0;while true do if (v118==0) then if  not v8 then return;end v101(v57.Text);break;end end end);v3.InputBegan:Connect(function(v119,v120) local v121=0;while true do if (v121==(603 -(268 + 335))) then if  not v8 then return;end if (v119.KeyCode==Enum.KeyCode.Up) then v10=math.max(1,v10-(291 -(60 + 230)) );v57.Text=v9[v10] or "" ;v57.CursorPosition= #v57.Text + (573 -(426 + 146)) ;elseif (v119.KeyCode==Enum.KeyCode.Down) then local v149=0 + 0 ;local v150;while true do if (v149==(1456 -(282 + 1174))) then v150=811 -(569 + 242) ;while true do if (v150==0) then v10=math.min( #v9 + (2 -1) ,v10 + 1 + 0 );v57.Text=v9[v10] or "" ;v150=1025 -(706 + 318) ;end if ((1252 -(721 + 530))==v150) then v57.CursorPosition= #v57.Text + 1 ;break;end end break;end end end break;end end end);v57.FocusLost:Connect(function(v122) local v123=1271 -(945 + 326) ;while true do if (v123==(0 -0)) then if  not v8 then return;end if v122 then local v143=0 + 0 ;local v144;while true do if (v143==(701 -(271 + 429))) then v102(v144);break;end if (v143==(0 + 0)) then local v151=0;while true do if (v151==(1501 -(1408 + 92))) then v143=1087 -(461 + 625) ;break;end if (v151==(1288 -(993 + 295))) then v144=v57.Text;v99();v151=1;end end end end else v99();end break;end end end);v6.info("Admin loaded  —  press ` to open");
+-- main.lua
+-- loadstring(game:HttpGet("https://raw.githubusercontent.com/aizen2tuffy/zero/main/main.lua"))()
+
+-- ── Already loaded guard ───────────────────────────────────────────────────────
+if _G.ZERO_LOADED then
+	warn("[Zero] Already loaded.")
+	return
+end
+_G.ZERO_LOADED = true
+
+local GITHUB_RAW = "https://raw.githubusercontent.com/aizen2tuffy/zero/main/"
+
+local function loadModule(path)
+	return loadstring(game:HttpGet(GITHUB_RAW .. path))()
+end
+
+-- ── Services ──────────────────────────────────────────────────────────────────
+local Players        = game:GetService("Players")
+local UIS            = game:GetService("UserInputService")
+local TweenService   = game:GetService("TweenService")
+local RunService     = game:GetService("RunService")
+local LocalPlayer    = Players.LocalPlayer
+local PlayerGui      = LocalPlayer:WaitForChild("PlayerGui")
+
+-- ── Modules ───────────────────────────────────────────────────────────────────
+local Notify   = loadModule("modules/Notify.lua")
+_G.__ZeroNotify = Notify
+local Commands = loadModule("modules/Commands.lua")
+
+-- ── State ─────────────────────────────────────────────────────────────────────
+local _open    = false
+local _history = {}
+local _histIdx = 0
+
+-- ── GUI ───────────────────────────────────────────────────────────────────────
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name           = "ZeroAdminGui"
+ScreenGui.ResetOnSpawn   = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent         = PlayerGui
+
+-- Backdrop
+local Backdrop = Instance.new("Frame", ScreenGui)
+Backdrop.Size                   = UDim2.fromScale(1, 1)
+Backdrop.BackgroundColor3       = Color3.fromRGB(0, 0, 0)
+Backdrop.BackgroundTransparency = 1
+Backdrop.BorderSizePixel        = 0
+Backdrop.ZIndex                 = 5
+Backdrop.Visible                = false
+
+-- Container
+local Container = Instance.new("Frame", ScreenGui)
+Container.Name                   = "Container"
+Container.AnchorPoint            = Vector2.new(0.5, 0)
+Container.Position               = UDim2.new(0.5, 0, 0, -60)
+Container.Size                   = UDim2.new(0, 540, 0, 44)
+Container.BackgroundColor3       = Color3.fromRGB(18, 18, 22)
+Container.BackgroundTransparency = 0
+Container.BorderSizePixel        = 0
+Container.ZIndex                 = 10
+Container.ClipsDescendants       = true
+
+Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 10)
+
+local Stroke = Instance.new("UIStroke", Container)
+Stroke.Color        = Color3.fromRGB(80, 80, 110)
+Stroke.Thickness    = 1
+Stroke.Transparency = 0.5
+
+local Prefix = Instance.new("TextLabel", Container)
+Prefix.Size                   = UDim2.new(0, 32, 1, 0)
+Prefix.Position               = UDim2.new(0, 10, 0, 0)
+Prefix.BackgroundTransparency = 1
+Prefix.Text                   = "⌘"
+Prefix.TextColor3             = Color3.fromRGB(140, 110, 230)
+Prefix.TextSize               = 16
+Prefix.Font                   = Enum.Font.GothamBold
+Prefix.ZIndex                 = 11
+
+local TextBox = Instance.new("TextBox", Container)
+TextBox.Position               = UDim2.new(0, 48, 0, 0)
+TextBox.Size                   = UDim2.new(1, -60, 1, 0)
+TextBox.BackgroundTransparency = 1
+TextBox.TextColor3             = Color3.fromRGB(230, 230, 240)
+TextBox.PlaceholderColor3      = Color3.fromRGB(85, 85, 110)
+TextBox.PlaceholderText        = "command...  (↑↓ history, Tab to complete)"
+TextBox.Text                   = ""
+TextBox.TextSize               = 14
+TextBox.Font                   = Enum.Font.Gotham
+TextBox.TextXAlignment         = Enum.TextXAlignment.Left
+TextBox.ClearTextOnFocus       = false
+TextBox.ZIndex                 = 11
+
+-- Suggestion bar
+local SuggestionBar = Instance.new("Frame", Container)
+SuggestionBar.Size                   = UDim2.new(1, 0, 0, 26)
+SuggestionBar.Position               = UDim2.new(0, 0, 1, 0)
+SuggestionBar.BackgroundColor3       = Color3.fromRGB(12, 12, 18)
+SuggestionBar.BackgroundTransparency = 0
+SuggestionBar.BorderSizePixel        = 0
+SuggestionBar.ZIndex                 = 10
+SuggestionBar.Visible                = false
+
+local SuggestLabel = Instance.new("TextLabel", SuggestionBar)
+SuggestLabel.Size                   = UDim2.new(1, -12, 1, 0)
+SuggestLabel.Position               = UDim2.new(0, 10, 0, 0)
+SuggestLabel.BackgroundTransparency = 1
+SuggestLabel.TextColor3             = Color3.fromRGB(110, 110, 145)
+SuggestLabel.TextSize               = 12
+SuggestLabel.Font                   = Enum.Font.Gotham
+SuggestLabel.TextXAlignment         = Enum.TextXAlignment.Left
+SuggestLabel.ZIndex                 = 11
+
+-- ── Tweens ────────────────────────────────────────────────────────────────────
+local TI_IN  = TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local TI_OUT = TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+
+local function openBar()
+	_open            = true
+	Backdrop.Visible = true
+	TweenService:Create(Backdrop,  TI_IN, {BackgroundTransparency = 0.72}):Play()
+	TweenService:Create(Container, TI_IN, {Position = UDim2.new(0.5, 0, 0, 14)}):Play()
+	task.delay(0.05, function()
+		TextBox.Text = ""
+		TextBox:CaptureFocus()
+	end)
+end
+
+local function closeBar()
+	_open = false
+	TextBox:ReleaseFocus()
+	TweenService:Create(Backdrop,  TI_OUT, {BackgroundTransparency = 1}):Play()
+	TweenService:Create(Container, TI_OUT, {Position = UDim2.new(0.5, 0, 0, -60)}):Play()
+	task.delay(0.2, function()
+		if not _open then
+			Backdrop.Visible      = false
+			SuggestionBar.Visible = false
+			Container.Size        = UDim2.new(0, 540, 0, 44)
+			TextBox.Text          = ""
+		end
+	end)
+end
+
+local function toggleBar()
+	if _open then closeBar() else openBar() end
+end
+
+-- ── Autocomplete ──────────────────────────────────────────────────────────────
+local _topSuggestion = nil
+
+local function updateSuggestions(text)
+	_topSuggestion = nil
+	if text == "" or text:find(" ") then
+		SuggestionBar.Visible = false
+		Container.Size        = UDim2.new(0, 540, 0, 44)
+		return
+	end
+	local word    = (text:match("^(%S+)") or ""):lower()
+	local matches = {}
+	for name in pairs(Commands.list) do
+		if name:sub(1, #word) == word and name ~= word then
+			table.insert(matches, name)
+		end
+	end
+	if #matches == 0 then
+		SuggestionBar.Visible = false
+		Container.Size        = UDim2.new(0, 540, 0, 44)
+	else
+		table.sort(matches)
+		_topSuggestion        = matches[1]
+		SuggestLabel.Text     = table.concat(matches, "   ")
+		SuggestionBar.Visible = true
+		Container.Size        = UDim2.new(0, 540, 0, 70)
+	end
+end
+
+-- ── Execute ───────────────────────────────────────────────────────────────────
+local function execute(raw)
+	if not raw or raw == "" then return end
+
+	-- Unload
+	if raw:lower() == "unload" then
+		Notify.send("Zero admin unloaded.", LocalPlayer, 3)
+		task.delay(0.5, function()
+			closeBar()
+			task.delay(0.3, function()
+				ScreenGui:Destroy()
+				_G.ZERO_LOADED   = nil
+				_G.__ZeroNotify  = nil
+			end)
+		end)
+		return
+	end
+
+	-- History (IY style)
+	if _history[#_history] ~= raw then
+		table.insert(_history, raw)
+	end
+	_histIdx = #_history + 1
+
+	local parts   = raw:split(" ")
+	local cmdName = parts[1]:lower()
+	table.remove(parts, 1)
+
+	local cmd = Commands.list[cmdName]
+	if cmd then
+		local ok, err = pcall(cmd, LocalPlayer, parts)
+		if not ok then
+			Notify.send("Error: " .. tostring(err), LocalPlayer, 5)
+		end
+	else
+		Notify.send("Unknown: " .. cmdName, LocalPlayer, 3)
+	end
+end
+
+-- ── Input — IY-style: prefix key triggers from Mouse.KeyDown ─────────────────
+-- IY uses the mouse KeyDown event so it fires even when chat is focused.
+-- We mirror that + UIS for backup.
+local IYMouse = LocalPlayer:GetMouse()
+
+local function onPrefixKey()
+	-- Don't open if a different textbox (chat etc.) is focused — only toggle
+	toggleBar()
+end
+
+-- Primary: mouse KeyDown (fires regardless of chat focus, like IY)
+IYMouse.KeyDown:Connect(function(key)
+	-- backtick (`) — same default as IY
+	if key == "`" or key == "'" then
+		RunService.RenderStepped:Wait()
+		onPrefixKey()
+	end
+end)
+
+-- Backup: UIS (for cases where mouse events aren't firing)
+UIS.InputBegan:Connect(function(input, processed)
+	if processed then return end
+	if input.KeyCode == Enum.KeyCode.BackQuote
+		or input.KeyCode == Enum.KeyCode.Quote then
+		onPrefixKey()
+	end
+end)
+
+-- ── TextBox input ─────────────────────────────────────────────────────────────
+TextBox:GetPropertyChangedSignal("Text"):Connect(function()
+	if _open then updateSuggestions(TextBox.Text) end
+end)
+
+-- History nav + Tab complete (also mirrors IY)
+UIS.InputBegan:Connect(function(input, processed)
+	if not _open then return end
+	if input.KeyCode == Enum.KeyCode.Up then
+		_histIdx               = math.max(1, _histIdx - 1)
+		TextBox.Text           = _history[_histIdx] or ""
+		TextBox.CursorPosition = #TextBox.Text + 1
+	elseif input.KeyCode == Enum.KeyCode.Down then
+		_histIdx               = math.min(#_history + 1, _histIdx + 1)
+		TextBox.Text           = _history[_histIdx] or ""
+		TextBox.CursorPosition = #TextBox.Text + 1
+	elseif input.KeyCode == Enum.KeyCode.Tab then
+		if _topSuggestion then
+			TextBox.Text           = _topSuggestion .. " "
+			TextBox.CursorPosition = #TextBox.Text + 1
+		end
+	end
+end)
+
+TextBox.FocusLost:Connect(function(enterPressed)
+	if not _open then return end
+	if enterPressed then
+		local text = TextBox.Text
+		closeBar()
+		execute(text)
+	else
+		closeBar()
+	end
+end)
+
+Notify.send("Zero admin loaded. Press ` to open.", LocalPlayer, 4)
