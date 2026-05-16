@@ -35,7 +35,7 @@ local _open    = false
 local _history = {}
 local _histIdx = 0
 
--- ── GUI — matches your original exactly, but centred vertically ───────────────
+-- ── GUI ───────────────────────────────────────────────────────────────────────
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name           = "ZeroAdminGui"
 ScreenGui.ResetOnSpawn   = false
@@ -44,31 +44,30 @@ ScreenGui.IgnoreGuiInset = true
 ScreenGui.DisplayOrder   = 100
 ScreenGui.Parent         = PlayerGui
 
--- Frame: full width, 40px tall, anchored at left-centre so it sits mid-screen
+-- Full width bar, vertically centred, matches your original GUI data layout
 local Frame = Instance.new("Frame", ScreenGui)
 Frame.Name                   = "Frame"
-Frame.AnchorPoint            = Vector2.new(0, 0.5)       -- left edge, vertical centre
-Frame.Position               = UDim2.new(0, 0, 0.5, 0)  -- exactly mid-screen vertically
-Frame.Size                   = UDim2.new(1, 0, 0, 40)   -- full width, 40px tall
+Frame.AnchorPoint            = Vector2.new(0, 0.5)      -- left edge, centred vertically
+Frame.Position               = UDim2.new(0, 0, 0.5, 0) -- mid screen
+Frame.Size                   = UDim2.new(1, 0, 0, 40)  -- full width, 40px tall
 Frame.BackgroundColor3       = Color3.fromRGB(18, 18, 22)
 Frame.BackgroundTransparency = 0
 Frame.BorderSizePixel        = 0
 Frame.ZIndex                 = 1
-Frame.Visible                = false  -- hidden by default, no flash
+Frame.Visible                = false
 
--- TextBox: centred inside Frame, matches original anchor (0.5, 0.5)
+-- TextBox — matches original: anchor (0.5,0.5), centred, full width, 26px, TextScaled
 local TextBox = Instance.new("TextBox", Frame)
 TextBox.Name                  = "TextBox"
 TextBox.AnchorPoint           = Vector2.new(0.5, 0.5)
 TextBox.Position              = UDim2.new(0.5, 0, 0.5, 0)
-TextBox.Size                  = UDim2.new(1, 0, 0, 26)   -- same height as original
+TextBox.Size                  = UDim2.new(1, 0, 0, 26)
 TextBox.BackgroundTransparency = 1
 TextBox.TextColor3            = Color3.fromRGB(230, 230, 240)
 TextBox.PlaceholderColor3     = Color3.fromRGB(85, 85, 110)
 TextBox.PlaceholderText       = "enter command..."
 TextBox.Text                  = ""
 TextBox.TextScaled            = true
-TextBox.TextSize              = 14
 TextBox.Font                  = Enum.Font.Gotham
 TextBox.TextXAlignment        = Enum.TextXAlignment.Left
 TextBox.TextEditable          = true
@@ -79,7 +78,7 @@ local Pad = Instance.new("UIPadding", TextBox)
 Pad.PaddingLeft  = UDim.new(0, 6)
 Pad.PaddingRight = UDim.new(0, 6)
 
--- Suggestion label — below the Frame, bigger and more visible
+-- Suggestions — bigger and more visible
 local SuggestLabel = Instance.new("TextLabel", Frame)
 SuggestLabel.Name               = "ZeroSuggest"
 SuggestLabel.AnchorPoint        = Vector2.new(0, 0)
@@ -94,7 +93,7 @@ SuggestLabel.Text               = ""
 SuggestLabel.ZIndex             = 2
 SuggestLabel.Visible            = false
 
--- ── Open / close — simple Visible toggle, exactly like the original ───────────
+-- ── Open / close — simple Visible toggle, no tweens ──────────────────────────
 local function openBar()
 	_open         = true
 	Frame.Visible = true
