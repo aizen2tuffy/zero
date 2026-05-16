@@ -6,7 +6,7 @@ if _G.ZERO_LOADED then warn("[Zero] Already loaded.") return end
 _G.ZERO_LOADED = true
 
 -- ── Password check ────────────────────────────────────────────────────────────
-local function passwordCheck(rconsoleprint)
+local function passwordCheck()
     if not rconsoleprint then return end -- skip if executor doesn't support it
     rconsolename("Zero Admin")
     rconsoleclear()
