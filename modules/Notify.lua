@@ -21,16 +21,15 @@ ScreenUI.Parent         = PlayerGui
 -- position x=0.2267, y=0.7964 (scale), size x=0.5467, y=0.0883 (scale), TextSize=31
 local Format = Instance.new("TextLabel", ScreenUI)
 Format.Name                  = "Format"
-Format.AnchorPoint           = Vector2.new(0, 0)
-Format.Position              = UDim2.new(0.22665661573410035, 0, 0.7964149713516235, 0)
-Format.Size                  = UDim2.new(0.5466867685317993, 0, 0.08834826946258545, 0)
-Format.BackgroundTransparency = 1
+Format.AnchorPoint = Vector2.new(0.5, 0)
+Format.Position    = UDim2.new(0.5, 0, 0.7964149713516235, 0)  -- x=0.5 = centre
+Format.Size        = UDim2.new(0.5466867685317993, 0, 0.08834826946258545, 0)
+Format.TextXAlignment = Enum.TextXAlignment.CenterFormat.BackgroundTransparency = 1
 Format.Text                  = ""
 Format.TextColor3            = Color3.fromRGB(255, 255, 255)
 Format.TextSize              = 31
 Format.TextScaled            = false
 Format.Font                  = Enum.Font.SourceSans
-Format.TextXAlignment        = Enum.TextXAlignment.Left
 Format.TextYAlignment        = Enum.TextYAlignment.Center
 Format.TextTransparency      = 1  -- invisible by default, tweened in
 Format.Visible               = true
