@@ -35,9 +35,12 @@ local RunService  = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui   = LocalPlayer:WaitForChild("PlayerGui")
 
-local Notify   = loadModule("modules/Notify.lua")
-_G.__ZeroNotify = Notify
-local Commands = loadModule("modules/Commands.lua")
+local ok1, Notify = pcall(loadModule, "modules/Notify.lua")
+if not ok1 then warn("[Zero] Failed to load Notify: "..tostring(Notify)) end
+_G.__ZeroNotify = ok1 and Notify or nil
+
+local ok2, Commands = pcall(loadModule, "modules/Commands.lua")
+if not ok2 then warn("[Zero] Failed to load Commands: "..tostring(Commands)) end
 
 local function safeNotify(msg, dur)
     if Notify and type(Notify.send) == "function" then
