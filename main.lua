@@ -4,26 +4,23 @@
 if _G.ZERO_LOADED then warn("[Zero] Already loaded.") return end
 _G.ZERO_LOADED = true
 
--- !! FIXED: base path, not the file itself
 local GITHUB_RAW = "https://raw.githubusercontent.com/aizen2tuffy/zero/main/"
 
 local function loadModule(path)
 	return loadstring(game:HttpGet(GITHUB_RAW .. path))()
 end
 
-local Players     = game:GetService("Players")
-local UIS         = game:GetService("UserInputService")
+local Players      = game:GetService("Players")
+local UIS          = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-local RunService  = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui   = LocalPlayer:WaitForChild("PlayerGui")
+local RunService   = game:GetService("RunService")
+local LocalPlayer  = Players.LocalPlayer
+local PlayerGui    = LocalPlayer:WaitForChild("PlayerGui")
 
--- ── Modules ───────────────────────────────────────────────────────────────────
 local Notify   = loadModule("modules/Notify.lua")
 _G.__ZeroNotify = Notify
 local Commands = loadModule("modules/Commands.lua")
 
--- safe wrappers so a broken module doesn't hard-crash
 local function safeNotify(msg, dur)
 	if Notify and type(Notify.send) == "function" then
 		Notify.send(msg, LocalPlayer, dur or 4)
@@ -35,7 +32,6 @@ local function cmdList()
 	return (Commands and type(Commands.list) == "table") and Commands.list or {}
 end
 
--- ── State ─────────────────────────────────────────────────────────────────────
 local _open    = false
 local _history = {}
 local _histIdx = 0
@@ -49,62 +45,48 @@ ScreenGui.IgnoreGuiInset = true
 ScreenGui.DisplayOrder   = 100
 ScreenGui.Parent         = PlayerGui
 
--- Dim backdrop
-local Backdrop = Instance.new("Frame", ScreenGui)
-Backdrop.Size                   = UDim2.fromScale(1, 1)
-Backdrop.BackgroundColor3       = Color3.fromRGB(0, 0, 0)
-Backdrop.BackgroundTransparency = 1
-Backdrop.BorderSizePixel        = 0
-Backdrop.ZIndex                 = 5
-Backdrop.Visible                = false
+-- Full-width bar, anchored centre-left, sits at vertical centre
+-- matches your GUI data: size X=1 scale, Y=26px, anchor=(0,0), position X=0, Y=0
+-- but we vertically centre it by anchoring at (0, 0.5) and Y=0.5
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Name                   = "Frame"
+Frame.AnchorPoint            = Vector2.new(0, 0.5)
+Frame.Position               = UDim2.new(0, 0, 0.5, -200) -- starts above centre (off screen for tween)
+Frame.Size                   = UDim2.new(1, 0, 0, 40)      -- full width, 40px tall (slightly thicker than original 26)
+Frame.BackgroundColor3       = Color3.fromRGB(18, 18, 22)
+Frame.BackgroundTransparency = 0.08
+Frame.BorderSizePixel        = 0
+Frame.ZIndex                 = 10
+Frame.ClipsDescendants       = true
 
--- ── Container — anchored to screen CENTER ─────────────────────────────────────
-local Container = Instance.new("Frame", ScreenGui)
-Container.Name                   = "Container"
-Container.AnchorPoint            = Vector2.new(0.5, 0.5)   -- pivot = centre of frame
-Container.Position               = UDim2.new(0.5, 0, 0.5, -200) -- starts off-screen above centre
-Container.Size                   = UDim2.new(0, 560, 0, 48)
-Container.BackgroundColor3       = Color3.fromRGB(18, 18, 26)
-Container.BackgroundTransparency = 0
-Container.BorderSizePixel        = 0
-Container.ZIndex                 = 10
-Container.ClipsDescendants       = true
-
-Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 10)
-
-local Stroke = Instance.new("UIStroke", Container)
+local Stroke = Instance.new("UIStroke", Frame)
 Stroke.Color        = Color3.fromRGB(100, 85, 210)
 Stroke.Thickness    = 1.5
-Stroke.Transparency = 0.35
+Stroke.Transparency = 0.4
 
--- Icon prefix
-local Prefix = Instance.new("TextLabel", Container)
-Prefix.Size                   = UDim2.new(0, 36, 1, 0)
-Prefix.Position               = UDim2.new(0, 10, 0, 0)
-Prefix.BackgroundTransparency = 1
-Prefix.Text                   = "⌘"
-Prefix.TextColor3             = Color3.fromRGB(140, 110, 230)
-Prefix.TextSize               = 18
-Prefix.Font                   = Enum.Font.GothamBold
-Prefix.ZIndex                 = 11
-
--- TextBox
-local TextBox = Instance.new("TextBox", Container)
-TextBox.Position               = UDim2.new(0, 52, 0, 0)
-TextBox.Size                   = UDim2.new(1, -64, 1, 0)
+-- TextBox — same as your GUI data, centred vertically in the bar
+local TextBox = Instance.new("TextBox", Frame)
+TextBox.Name                  = "TextBox"
+TextBox.AnchorPoint           = Vector2.new(0.5, 0.5)
+TextBox.Position              = UDim2.new(0.5, 0, 0.5, 0)
+TextBox.Size                  = UDim2.new(1, -16, 1, 0)
 TextBox.BackgroundTransparency = 1
-TextBox.TextColor3             = Color3.fromRGB(235, 235, 250)
-TextBox.PlaceholderColor3      = Color3.fromRGB(90, 90, 120)
-TextBox.PlaceholderText        = "command…   ↑↓ history   Tab complete"
-TextBox.Text                   = ""
-TextBox.TextSize               = 16
-TextBox.Font                   = Enum.Font.Gotham
-TextBox.TextXAlignment         = Enum.TextXAlignment.Left
-TextBox.ClearTextOnFocus       = false
-TextBox.ZIndex                 = 11
+TextBox.TextColor3            = Color3.fromRGB(235, 235, 250)
+TextBox.PlaceholderColor3     = Color3.fromRGB(90, 90, 120)
+TextBox.PlaceholderText       = "command…   ↑↓ history   Tab complete"
+TextBox.Text                  = ""
+TextBox.TextSize              = 16
+TextBox.Font                  = Enum.Font.Gotham
+TextBox.TextXAlignment        = Enum.TextXAlignment.Left
+TextBox.ClearTextOnFocus      = false
+TextBox.ZIndex                = 11
 
--- Suggestion row
-local SuggestionBar = Instance.new("Frame", Container)
+local Pad = Instance.new("UIPadding", TextBox)
+Pad.PaddingLeft  = UDim.new(0, 8)
+Pad.PaddingRight = UDim.new(0, 8)
+
+-- Suggestion bar — attaches below Frame
+local SuggestionBar = Instance.new("Frame", Frame)
 SuggestionBar.Size                   = UDim2.new(1, 0, 0, 28)
 SuggestionBar.Position               = UDim2.new(0, 0, 1, 0)
 SuggestionBar.BackgroundColor3       = Color3.fromRGB(12, 12, 20)
@@ -117,7 +99,7 @@ local SuggestLabel = Instance.new("TextLabel", SuggestionBar)
 SuggestLabel.Size                   = UDim2.new(1, -16, 1, 0)
 SuggestLabel.Position               = UDim2.new(0, 12, 0, 0)
 SuggestLabel.BackgroundTransparency = 1
-SuggestLabel.TextColor3             = Color3.fromRGB(180, 165, 255)  -- bright purple-white
+SuggestLabel.TextColor3             = Color3.fromRGB(180, 165, 255)
 SuggestLabel.TextSize               = 15
 SuggestLabel.Font                   = Enum.Font.GothamMedium
 SuggestLabel.TextXAlignment         = Enum.TextXAlignment.Left
@@ -127,15 +109,13 @@ SuggestLabel.ZIndex                 = 11
 local TI_IN  = TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 local TI_OUT = TweenInfo.new(0.15, Enum.EasingStyle.Quint, Enum.EasingDirection.In)
 
--- open tweens TO centre, close tweens back above
-local OPEN_POS  = UDim2.new(0.5, 0, 0.5, 0)   -- exact screen centre
-local CLOSE_POS = UDim2.new(0.5, 0, 0.5, -200)
+local OPEN_POS  = UDim2.new(0, 0, 0.5, 0)    -- vertically centred, full width
+local CLOSE_POS = UDim2.new(0, 0, 0.5, -200) -- above centre, hidden
 
 local function openBar()
-	_open            = true
-	Backdrop.Visible = true
-	TweenService:Create(Backdrop,   TI_IN, {BackgroundTransparency = 0.68}):Play()
-	TweenService:Create(Container,  TI_IN, {Position = OPEN_POS}):Play()
+	_open         = true
+	Frame.Visible = true
+	TweenService:Create(Frame, TI_IN, {Position = OPEN_POS}):Play()
 	task.delay(0.05, function()
 		TextBox.Text = ""
 		TextBox:CaptureFocus()
@@ -145,13 +125,12 @@ end
 local function closeBar()
 	_open = false
 	TextBox:ReleaseFocus()
-	TweenService:Create(Backdrop,   TI_OUT, {BackgroundTransparency = 1}):Play()
-	TweenService:Create(Container,  TI_OUT, {Position = CLOSE_POS}):Play()
+	TweenService:Create(Frame, TI_OUT, {Position = CLOSE_POS}):Play()
 	task.delay(0.2, function()
 		if not _open then
-			Backdrop.Visible      = false
+			Frame.Visible         = false
 			SuggestionBar.Visible = false
-			Container.Size        = UDim2.new(0, 560, 0, 48)
+			Frame.Size            = UDim2.new(1, 0, 0, 40)
 			TextBox.Text          = ""
 		end
 	end)
@@ -168,7 +147,7 @@ local function updateSuggestions(text)
 	_topSuggestion = nil
 	if text == "" or text:find(" ") then
 		SuggestionBar.Visible = false
-		Container.Size        = UDim2.new(0, 560, 0, 48)
+		Frame.Size            = UDim2.new(1, 0, 0, 40)
 		return
 	end
 	local word    = (text:match("^(%S+)") or ""):lower()
@@ -180,13 +159,13 @@ local function updateSuggestions(text)
 	end
 	if #matches == 0 then
 		SuggestionBar.Visible = false
-		Container.Size        = UDim2.new(0, 560, 0, 48)
+		Frame.Size            = UDim2.new(1, 0, 0, 40)
 	else
 		table.sort(matches)
 		_topSuggestion        = matches[1]
 		SuggestLabel.Text     = "  " .. table.concat(matches, "   ·   ")
 		SuggestionBar.Visible = true
-		Container.Size        = UDim2.new(0, 560, 0, 76)
+		Frame.Size            = UDim2.new(1, 0, 0, 68)
 	end
 end
 
