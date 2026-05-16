@@ -235,7 +235,7 @@ end)
 -- Backup: UIS (for cases where mouse events aren't firing)
 UIS.InputBegan:Connect(function(input, processed)
 	if processed then return end
-	if input.KeyCode == Enum.KeyCode.BackQuote
+	if input.KeyCode == Enum.KeyCode.Tilde
 		or input.KeyCode == Enum.KeyCode.Quote then
 		onPrefixKey()
 	end
