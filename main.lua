@@ -1,13 +1,8 @@
--- main.lua
--- local Url = ("https://cdn.jsdelivr.net/gh/aizen2tuffy/zero@main/main.lua?%d"):format(tick())
--- loadstring(game:HttpGet(Url))()
-
 if _G.ZERO_LOADED then warn("[Zero] Already loaded.") return end
 _G.ZERO_LOADED = true
 
--- ── Password check ────────────────────────────────────────────────────────────
-local function passwordCheck()
-    if not rconsoleprint then return end -- skip if executor doesn't support it
+local function passwordCheck(rconsoleprint)
+    if not rconsoleprint then return end
     rconsolename("Zero Admin")
     rconsoleclear()
     local function prompt()
@@ -27,9 +22,8 @@ local function passwordCheck()
     end
     prompt()
 end
-passwordCheck()
+passwordCheck(rconsoleprint)
 
--- ── Core ──────────────────────────────────────────────────────────────────────
 local GITHUB_RAW = "https://cdn.jsdelivr.net/gh/aizen2tuffy/zero@main/"
 local function loadModule(path)
     return loadstring(game:HttpGet(GITHUB_RAW .. path .. "?t=" .. tick()))()
@@ -58,7 +52,6 @@ local _open    = false
 local _history = {}
 local _histIdx = 0
 
--- ── GUI ───────────────────────────────────────────────────────────────────────
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name           = "ZeroAdminGui"
 ScreenGui.ResetOnSpawn   = false
@@ -99,7 +92,6 @@ local Pad = Instance.new("UIPadding", TextBox)
 Pad.PaddingLeft  = UDim.new(0, 6)
 Pad.PaddingRight = UDim.new(0, 6)
 
--- Suggestion dropdown
 local SuggestionBar = Instance.new("Frame", ScreenGui)
 SuggestionBar.Name                   = "SuggestionBar"
 SuggestionBar.AnchorPoint            = Vector2.new(0, 0)
@@ -116,7 +108,6 @@ SuggestionLayout.FillDirection = Enum.FillDirection.Vertical
 SuggestionLayout.SortOrder     = Enum.SortOrder.LayoutOrder
 SuggestionLayout.Padding       = UDim.new(0, 0)
 
--- ── Suggestions ───────────────────────────────────────────────────────────────
 local _topSuggestion   = nil
 local _suggestionLabels = {}
 
@@ -140,7 +131,6 @@ local function updateSuggestions(text)
     end
     if #matches == 0 then return end
     table.sort(matches)
-    -- cap at 6 suggestions
     local ROW_H = 28
     for i = 1, math.min(#matches, 6) do
         local name = matches[i]
@@ -163,7 +153,6 @@ local function updateSuggestions(text)
     SuggestionBar.Visible = true
 end
 
--- ── Open / close ──────────────────────────────────────────────────────────────
 local function openBar()
     _open = true
     Frame.Visible = true
@@ -188,7 +177,6 @@ local function toggleBar()
     if _open then closeBar() else openBar() end
 end
 
--- ── Execute ───────────────────────────────────────────────────────────────────
 local function execute(raw)
     if not raw or raw == "" then return end
     if raw:lower() == "unload" then
@@ -217,7 +205,6 @@ local function execute(raw)
     end
 end
 
--- ── Input ─────────────────────────────────────────────────────────────────────
 local IYMouse = LocalPlayer:GetMouse()
 IYMouse.KeyDown:Connect(function(key)
     if key == ";" then RunService.RenderStepped:Wait() toggleBar() end
