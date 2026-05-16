@@ -8,7 +8,7 @@ if _G.ZERO_LOADED then
 end
 _G.ZERO_LOADED = true
 
-local GITHUB_RAW = "https://raw.githubusercontent.com/aizen2tuffy/zero/main/"
+local GITHUB_RAW = "https://raw.githubusercontent.com/aizen2tuffy/zero/main/main.lua"
 
 local function loadModule(path)
 	return loadstring(game:HttpGet(GITHUB_RAW .. path))()
