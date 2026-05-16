@@ -1,4 +1,4 @@
-local GITHUB_RAW = "https://raw.githubusercontent.com/YOU/REPO/main/"
+local GITHUB_RAW = "https://raw.githubusercontent.com/aizen2tuffy/zero/refs/heads/main/main.lua"
 
 local function loadModule(path)
 	return loadstring(game:HttpGet(GITHUB_RAW .. path))()
