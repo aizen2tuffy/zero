@@ -226,7 +226,7 @@ end
 -- Primary: mouse KeyDown (fires regardless of chat focus, like IY)
 IYMouse.KeyDown:Connect(function(key)
 	-- backtick (`) — same default as IY
-	if key == "`" or key == "'" then
+	if key == ";" then
 		RunService.RenderStepped:Wait()
 		onPrefixKey()
 	end
@@ -235,8 +235,7 @@ end)
 -- Backup: UIS (for cases where mouse events aren't firing)
 UIS.InputBegan:Connect(function(input, processed)
 	if processed then return end
-	if input.KeyCode == Enum.KeyCode.Tilde
-		or input.KeyCode == Enum.KeyCode.Quote then
+	if input.KeyCode == Enum.KeyCode.Semicolon then
 		onPrefixKey()
 	end
 end)
