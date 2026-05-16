@@ -78,20 +78,22 @@ local Pad = Instance.new("UIPadding", TextBox)
 Pad.PaddingLeft  = UDim.new(0, 6)
 Pad.PaddingRight = UDim.new(0, 6)
 
--- Suggestions — bigger and more visible
-local SuggestLabel = Instance.new("TextLabel", Frame)
-SuggestLabel.Name               = "ZeroSuggest"
-SuggestLabel.AnchorPoint        = Vector2.new(0, 0)
-SuggestLabel.Position           = UDim2.new(0, 6, 1, 4)
-SuggestLabel.Size               = UDim2.new(1, -12, 0, 22)
-SuggestLabel.BackgroundTransparency = 1
-SuggestLabel.TextColor3         = Color3.fromRGB(190, 175, 255)
-SuggestLabel.TextSize           = 15
-SuggestLabel.Font               = Enum.Font.GothamMedium
-SuggestLabel.TextXAlignment     = Enum.TextXAlignment.Left
-SuggestLabel.Text               = ""
-SuggestLabel.ZIndex             = 2
-SuggestLabel.Visible            = false
+local SuggestionBar = Instance.new("Frame", ScreenGui)
+SuggestionBar.Name                   = "SuggestionBar"
+SuggestionBar.AnchorPoint            = Vector2.new(0, 0.5)
+SuggestionBar.Position               = UDim2.new(0, 0, 0.5, 20) -- just below Frame
+SuggestionBar.Size                   = UDim2.new(1, 0, 0, 0)    -- grows with content
+SuggestionBar.BackgroundColor3       = Color3.fromRGB(14, 14, 20)
+SuggestionBar.BackgroundTransparency = 0
+SuggestionBar.BorderSizePixel        = 0
+SuggestionBar.ZIndex                 = 2
+SuggestionBar.Visible                = false
+SuggestionBar.ClipsDescendants       = false
+
+local SuggestionLayout = Instance.new("UIListLayout", SuggestionBar)
+SuggestionLayout.FillDirection  = Enum.FillDirection.Vertical
+SuggestionLayout.SortOrder      = Enum.SortOrder.LayoutOrder
+SuggestionLayout.Padding        = UDim.new(0, 0)
 
 -- ── Open / close — simple Visible toggle, no tweens ──────────────────────────
 local function openBar()
@@ -107,11 +109,11 @@ local function openBar()
 end
 
 local function closeBar()
-	_open                = false
-	Frame.Visible        = false
+	_open = false
 	TextBox:ReleaseFocus()
-	SuggestLabel.Text    = ""
-	SuggestLabel.Visible = false
+	Frame.Visible = false
+	clearSuggestions()
+	TextBox.Text  = ""
 end
 
 local function toggleBar()
@@ -120,14 +122,23 @@ end
 
 -- ── Autocomplete ──────────────────────────────────────────────────────────────
 local _topSuggestion = nil
+local _suggestionLabels = {}
+
+local function clearSuggestions()
+	for _, lbl in ipairs(_suggestionLabels) do
+		lbl:Destroy()
+	end
+	_suggestionLabels = {}
+	SuggestionBar.Visible = false
+	SuggestionBar.Size    = UDim2.new(1, 0, 0, 0)
+end
 
 local function updateSuggestions(text)
+	clearSuggestions()
 	_topSuggestion = nil
-	if text == "" or text:find(" ") then
-		SuggestLabel.Visible = false
-		SuggestLabel.Text    = ""
-		return
-	end
+
+	if text == "" or text:find(" ") then return end
+
 	local word    = (text:match("^(%S+)") or ""):lower()
 	local matches = {}
 	for name in pairs(cmdList()) do
@@ -135,15 +146,36 @@ local function updateSuggestions(text)
 			table.insert(matches, name)
 		end
 	end
-	if #matches == 0 then
-		SuggestLabel.Visible = false
-		SuggestLabel.Text    = ""
-	else
-		table.sort(matches)
-		_topSuggestion       = matches[1]
-		SuggestLabel.Text    = "  " .. table.concat(matches, "   ·   ")
-		SuggestLabel.Visible = true
+
+	if #matches == 0 then return end
+
+	table.sort(matches)
+	_topSuggestion = matches[1]
+
+	local ROW_H = 28
+	for i, name in ipairs(matches) do
+		local row = Instance.new("TextLabel", SuggestionBar)
+		row.Name                  = "Suggestion_" .. i
+		row.Size                  = UDim2.new(1, 0, 0, ROW_H)
+		row.BackgroundColor3      = i == 1
+			and Color3.fromRGB(40, 35, 65)   -- highlight top match
+			or  Color3.fromRGB(14, 14, 20)
+		row.BackgroundTransparency = 0
+		row.BorderSizePixel       = 0
+		row.TextColor3            = i == 1
+			and Color3.fromRGB(210, 195, 255)
+			or  Color3.fromRGB(160, 150, 200)
+		row.TextSize              = 15
+		row.Font                  = Enum.Font.GothamMedium
+		row.TextXAlignment        = Enum.TextXAlignment.Left
+		row.Text                  = "  " .. name
+		row.LayoutOrder           = i
+		row.ZIndex                = 3
+		table.insert(_suggestionLabels, row)
 	end
+
+	SuggestionBar.Size    = UDim2.new(1, 0, 0, ROW_H * #matches)
+	SuggestionBar.Visible = true
 end
 
 -- ── Execute ───────────────────────────────────────────────────────────────────
